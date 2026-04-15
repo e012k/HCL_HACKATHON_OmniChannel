@@ -2,104 +2,95 @@
 OmniChannel_Sales Consolidator
 
 
-🛒 OmniChannel Sales Consolidator
-📌 Project Overview
+📂 Data Description
 
-The OmniChannel Sales Consolidator is a data integration project built using Informatica Intelligent Cloud Services (IICS).
-It automates the process of combining sales data from multiple sources, enriching it with product and supplier details, and generating a clean Daily Revenue Summary.
+1. Online Sales (Online_Sales.csv)
 
-📂 Data Sources
-📄 File 1: Online_Sales.csv (Source A)
+Contains online transaction data:
 
-Contains online transaction data.
+TRANS_ID – Transaction identifier
+PROD_ID – Product reference
+QTY – Quantity sold
+UNIT_PRICE – Price per unit
+TAX – Tax applied
+TRANS_DATE – Transaction date
 
-📄 File 2: Warehouse_Sales.csv (Source B)
-Trans_ID, Prod_ID, Qty, Unit_Price, Tax, Trans_Date
-📄 File 3: Product_Master.csv (Lookup Source)
-Prod_ID, Prod_Name, Supplier_Name, Category
-⚙️ Solution Architecture
+2. Warehouse Sales (Warehouse_Sales.csv)
 
-The solution is divided into two mappings:
+Contains offline/warehouse transaction data:
 
-🔹 Mapping 1: Data Consolidation --
+TRANS_ID – Transaction identifier
+PROD_ID – Product reference
+QTY – Quantity sold
+UNIT_PRICE – Price per unit
+TAX – Tax applied
+TRANS_DATE – Transaction date
 
-Flow:
-. Sources
-       Online_Sales
-       Warehouse_Sales
-. Union Transformation
-       Combines both sources
-. Expression Transformation
-      Converts Trans_Date into proper date format
-      Standardizes data
-. Sorter Transformation
-      Sorts data by:
-      Trans_Date
-      Prod_ID
-. Target Load
-      Loads cleaned data into tgt_result_m1
-      
-      
-🔹 Mapping 2: Data Enrichment, Filtering & Calculation --
+3. Product Master (Product_Master.csv)
 
-Flow:
-. Source 
-     Tgt_result_m1
-. Lookup Transformation
-     Lookup File: Product_Master.csv
-     Lookup Condition : SRC.Prod_ID = LKP.Prod_ID
-     Adds:
-     Product Name
-     Supplier Name
-     Category
-. Filter Transformation
-     NOT ISNULL(Supplier_Name)
-     Removes invalid records (missing supplier info)
-. Expression Transformation
-     Calculates:
-     TotalLineItemCost = (Unit_Price * Qty) + Tax
-. Target Load
-     Final data stored in tgt_result_m2
+Contains product-related details:
 
-     
-🔄 Taskflow Design --
+PROD_ID – Unique product identifier
+PROD_NAME – Name of product
+SUPPLIER_NAME – Supplier of product
+CATEGORY – Product category
+🎯 Objective
 
-📌 Control Flow Logic
-. Data Task 1 (DT1)
-    Executes Mapping 1
-. Decision Task
-    Condition:
-    Task Status (DT1) = Succeeded
-    Implementation:
-    Select DT1 field
+The goal is to:
 
-Apply condition:
+Combine sales data from multiple channels (Online + Warehouse)
+Standardize and clean transaction data
+Enrich data with product and supplier details
+Filter invalid records
+Calculate Total Line Item Cost
+Generate a final summarized dataset
 
-content = 1
-(1 represents Success in IICS)
-Data Task 2 (DT2)
-Executes Mapping 2 only if DT1 is successful
-End
-Stops execution if Mapping 1 fails
+⚙️ Transformations Performed
+
+✅ Mapping 1: Data Consolidation (m_Data_Consolidation)
+Source: Online_Sales + Warehouse_Sales
+Union Transformation: Combines both sources
+Expression Transformation:
+Standardizes data
+Converts TRANS_DATE into proper date format
+Sorter Transformation:
+Sorts data by TRANS_DATE and PROD_ID
+Target: tgt_result_m1
+
+✅ Mapping 2: Data Enrichment & Calculation (m_Data_Enrichment)
+Source: tgt_result_m1
+
+Lookup Transformation:
+
+Lookup File: Product_Master
+Condition: PROD_ID = PROD_ID
+Adds:
+PROD_NAME
+SUPPLIER_NAME
+CATEGORY
+
+Filter Transformation:
+
+Condition: NOT ISNULL(SUPPLIER_NAME)
+Removes records with missing supplier details
+
+Expression Transformation:
+
+TOTAL_LINE_ITEM_COST = (UNIT_PRICE * QTY) + TAX
+Target: tgt_result_m2
+
+
+🔁 Taskflow Design
+
+Execution Flow:
+
+Step 1: Run m_Data_Consolidation (DT1)
+Step 2: Decision Task
+Condition: Task Status (DT1) = 1 (Success)
+Step 3: Run m_Data_Enrichment (DT2) only if DT1 succeeds
+Step 4: End execution if DT1 fails
 📊 Final Output Fields (tgt_result_m2)
-Trans_ID
-Trans_Date
-Supplier_Name
-TotalLineItemCost
-
-🧠 Data Modeling (Fact & Dimension)
-📌 Fact Table → Fact_Sales (tgt_result_m2)
-
-Contains measurable business data:
-
-TotalLineItemCost
-(Derived from Qty, Unit_Price, Tax)
-📌 Dimension Table → Dim_Product (Product_Master)
-
-Contains descriptive attributes:
-
-Prod_ID
-Prod_Name
-Trans_date
-Supplier_Name
-Total_line_item_cost
+TRANS_ID
+TRANS_DATE
+SUPPLIER_NAME
+TOTAL_LINE_ITEM_COST
