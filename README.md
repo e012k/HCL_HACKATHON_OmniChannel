@@ -1,13 +1,5 @@
 # 🛒 HCL_HACKATHON_OmniChannel – Data Pipeline Project  
 
-## 🚀 Project Overview  
-
-This project demonstrates the design and implementation of a **data pipeline using Informatica Intelligent Cloud Services (IICS)**.  
-
-The pipeline extracts sales data from multiple channels, consolidates it, enriches it with product details, and generates a clean **Daily Revenue Summary dataset**.  
-
----
-
 ## 📂 Data Description  
 
 ### 1. Online Sales (`Online_Sales.csv`)  
@@ -57,37 +49,6 @@ The goal is to:
 * Filter invalid records  
 * Calculate **TOTAL_LINE_ITEM_COST**  
 * Generate a final summarized dataset  
-
----
-
-## 🏗️ Data Model  
-
-### 🔹 Dimension Table  
-
-* `DIM_PRODUCT`  
-
-Contains:  
-
-* `PROD_ID`  
-* `PROD_NAME`  
-* `SUPPLIER_NAME`  
-* `CATEGORY`  
-
----
-
-### 🔹 Fact Table  
-
-* `FACT_SALES (tgt_result_m2)`  
-
-The fact table contains:  
-
-* `TRANS_ID`  
-* `TRANS_DATE`  
-* `SUPPLIER_NAME`  
-
-**Measure:**  
-
-* `TOTAL_LINE_ITEM_COST`  
 
 ---
 
